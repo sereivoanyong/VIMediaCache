@@ -15,20 +15,20 @@ static NSString *kByteRangeAccessSupported = @"kByteRangeAccessSupported";
 @implementation VIContentInfo
 
 - (NSString *)debugDescription {
-    return [NSString stringWithFormat:@"%@\ncontentLength: %lld\ncontentType: %@\nbyteRangeAccessSupported:%@", NSStringFromClass([self class]), self.contentLength, self.contentType, @(self.byteRangeAccessSupported)];
+    return [NSString stringWithFormat:@"%@\ncontentType: %@\ncontentLength: %lld\nbyteRangeAccessSupported:%@", NSStringFromClass([self class]), self.contentType, self.contentLength, @(self.byteRangeAccessSupported)];
 }
 
 - (void)encodeWithCoder:(NSCoder *)aCoder {
-    [aCoder encodeObject:@(self.contentLength) forKey:kContentLengthKey];
     [aCoder encodeObject:self.contentType forKey:kContentTypeKey];
+    [aCoder encodeObject:@(self.contentLength) forKey:kContentLengthKey];
     [aCoder encodeObject:@(self.byteRangeAccessSupported) forKey:kByteRangeAccessSupported];
 }
 
 - (nullable instancetype)initWithCoder:(NSCoder *)aDecoder {
     self = [super init];
     if (self) {
-        _contentLength = [[aDecoder decodeObjectForKey:kContentLengthKey] longLongValue];
         _contentType = [aDecoder decodeObjectForKey:kContentTypeKey];
+        _contentLength = [[aDecoder decodeObjectForKey:kContentLengthKey] longLongValue];
         _byteRangeAccessSupported = [[aDecoder decodeObjectForKey:kByteRangeAccessSupported] boolValue];
     }
     return self;

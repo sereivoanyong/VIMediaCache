@@ -9,5 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @interface NSString (VIMD5)
+
 - (NSString *)vi_md5;
+
 @end

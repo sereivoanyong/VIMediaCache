@@ -68,7 +68,7 @@ static NSString *kURLKey = @"kURLKey";
 }
 
 - (long long)downloadedBytes {
-    float bytes = 0;
+    long long bytes = 0;
     @synchronized (self.internalCacheFragments) {
         for (NSValue *range in self.internalCacheFragments) {
             bytes += range.rangeValue.length;
@@ -82,8 +82,8 @@ static NSString *kURLKey = @"kURLKey";
     NSTimeInterval time = 0;
     @synchronized (self.downloadInfo) {
         for (NSArray *a in self.downloadInfo) {
-            bytes += [[a firstObject] longLongValue];
-            time += [[a lastObject] doubleValue];
+            bytes += [a.firstObject longLongValue];
+            time += [a.lastObject doubleValue];
         }
     }
     return bytes / 1024.0 / time;
@@ -165,12 +165,12 @@ static NSString *kURLKey = @"kURLKey";
         NSMutableArray *internalCacheFragments = [self.internalCacheFragments mutableCopy];
         
         NSValue *fragmentValue = [NSValue valueWithRange:fragment];
-        NSInteger count = self.internalCacheFragments.count;
+        NSUInteger count = self.internalCacheFragments.count;
         if (count == 0) {
             [internalCacheFragments addObject:fragmentValue];
         } else {
             NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
-            [internalCacheFragments enumerateObjectsUsingBlock:^(NSValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [internalCacheFragments enumerateObjectsUsingBlock:^(NSValue *obj, NSUInteger idx, BOOL *stop) {
                 NSRange range = obj.rangeValue;
                 if ((fragment.location + fragment.length) <= range.location) {
                     if (indexSet.count == 0) {
@@ -189,8 +189,8 @@ static NSString *kURLKey = @"kURLKey";
             if (indexSet.count > 1) {
                 NSRange firstRange = self.internalCacheFragments[indexSet.firstIndex].rangeValue;
                 NSRange lastRange = self.internalCacheFragments[indexSet.lastIndex].rangeValue;
-                NSInteger location = MIN(firstRange.location, fragment.location);
-                NSInteger endOffset = MAX(lastRange.location + lastRange.length, fragment.location + fragment.length);
+                NSUInteger location = MIN(firstRange.location, fragment.location);
+                NSUInteger endOffset = MAX(lastRange.location + lastRange.length, fragment.location + fragment.length);
                 NSRange combineRange = NSMakeRange(location, endOffset - location);
                 [internalCacheFragments removeObjectsAtIndexes:indexSet];
                 [internalCacheFragments insertObject:[NSValue valueWithRange:combineRange] atIndex:indexSet.firstIndex];
@@ -201,8 +201,8 @@ static NSString *kURLKey = @"kURLKey";
                 NSRange expandFragmentRange = NSMakeRange(fragment.location, fragment.length + 1);
                 NSRange intersectionRange = NSIntersectionRange(expandFirstRange, expandFragmentRange);
                 if (intersectionRange.length > 0) { // Should combine
-                    NSInteger location = MIN(firstRange.location, fragment.location);
-                    NSInteger endOffset = MAX(firstRange.location + firstRange.length, fragment.location + fragment.length);
+                    NSUInteger location = MIN(firstRange.location, fragment.location);
+                    NSUInteger endOffset = MAX(firstRange.location + firstRange.length, fragment.location + fragment.length);
                     NSRange combineRange = NSMakeRange(location, endOffset - location);
                     [internalCacheFragments removeObjectAtIndex:indexSet.firstIndex];
                     [internalCacheFragments insertObject:[NSValue valueWithRange:combineRange] atIndex:indexSet.firstIndex];
@@ -238,22 +238,21 @@ static NSString *kURLKey = @"kURLKey";
         return NO;
     }
     
-    NSUInteger fileSize = (NSUInteger)attributes.fileSize;
-    NSRange range = NSMakeRange(0, fileSize);
-    
+    unsigned long long fileSize = attributes.fileSize;
+    NSRange range = NSMakeRange(0, (NSUInteger)fileSize);
+
     VICacheConfiguration *configuration = [VICacheConfiguration configurationWithFilePath:filePath];
     configuration.url = url;
     
     VIContentInfo *contentInfo = [VIContentInfo new];
     
-    NSString *fileExtension = [url pathExtension];
+    NSString *fileExtension = url.pathExtension;
     NSString *UTI = (__bridge_transfer NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)fileExtension, NULL);
     NSString *contentType = (__bridge_transfer NSString *)UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)UTI, kUTTagClassMIMEType);
     if (!contentType) {
         contentType = @"application/octet-stream";
     }
     contentInfo.contentType = contentType;
-    
     contentInfo.contentLength = fileSize;
     contentInfo.byteRangeAccessSupported = YES;
     contentInfo.downloadedContentLength = fileSize;

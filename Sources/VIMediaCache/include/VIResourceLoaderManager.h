@@ -9,12 +9,14 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol VIResourceLoaderManagerDelegate;
 
 @interface VIResourceLoaderManager : NSObject <AVAssetResourceLoaderDelegate>
 
 
-@property (nonatomic, weak) id<VIResourceLoaderManagerDelegate> delegate;
+@property (nonatomic, weak, nullable) id<VIResourceLoaderManagerDelegate> delegate;
 
 /**
  Normally you no need to call this method to clean cache. Cache cleaned after AVPlayer delloc.
@@ -41,3 +43,5 @@
 - (AVPlayerItem *)playerItemWithURL:(NSURL *)url;
 
 @end
+
+NS_ASSUME_NONNULL_END

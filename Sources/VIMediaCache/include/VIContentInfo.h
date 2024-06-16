@@ -8,11 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface VIContentInfo : NSObject <NSCoding>
 
-@property (nonatomic, copy) NSString *contentType;
-@property (nonatomic, assign) BOOL byteRangeAccessSupported;
+@property (nonatomic, copy, nullable) NSString *contentType;
 @property (nonatomic, assign) unsigned long long contentLength;
+@property (nonatomic, assign) BOOL byteRangeAccessSupported;
 @property (nonatomic) unsigned long long downloadedContentLength;
 
 @end
+
+NS_ASSUME_NONNULL_END

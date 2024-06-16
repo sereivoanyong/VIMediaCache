@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "VIContentInfo.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface VICacheConfiguration : NSObject <NSCopying>
 
 + (NSString *)configurationFilePathForFilePath:(NSString *)filePath;
@@ -45,3 +47,5 @@
 + (BOOL)createAndSaveDownloadedConfigurationForURL:(NSURL *)url error:(NSError **)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

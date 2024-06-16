@@ -12,6 +12,6 @@
 
 @property (nonatomic, strong, readonly) NSOperationQueue *downloadQueue;
 
-+ (instancetype)shared;
+@property (class, nonatomic, strong, readonly) VICacheSessionManager *sharedInstance;
 
 @end

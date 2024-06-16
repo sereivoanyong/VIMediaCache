@@ -17,16 +17,16 @@
 
 #pragma mark - Class: VIURLSessionDelegateObject
 
-@protocol  VIURLSessionDelegateObjectDelegate <NSObject>
+@protocol VIURLSessionDelegateObjectDelegate <NSObject>
 
-- (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler;
+- (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential *))completionHandler;
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveResponse:(NSURLResponse *)response completionHandler:(void (^)(NSURLSessionResponseDisposition disposition))completionHandler;
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data;
-- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(nullable NSError *)error;
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error;
 
 @end
 
-static NSInteger kBufferSize = 10 * 1024;
+static NSUInteger kBufferSize = 10 * 1024;
 
 @interface VIURLSessionDelegateObject : NSObject <NSURLSessionDelegate>
 
@@ -49,7 +49,7 @@ static NSInteger kBufferSize = 10 * 1024;
 }
 
 #pragma mark - NSURLSessionDataDelegate
-- (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler{
+- (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential *))completionHandler{
     [self.delegate URLSession:session didReceiveChallenge:challenge completionHandler:completionHandler];
 }
 
@@ -122,7 +122,7 @@ didCompleteWithError:(nullable NSError *)error {
 @property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) VIURLSessionDelegateObject *sessionDelegateObject;
 @property (nonatomic, strong) NSURLSessionDataTask *task;
-@property (nonatomic) NSInteger startOffset;
+@property (nonatomic) NSUInteger startOffset;
 
 @end
 
@@ -171,7 +171,7 @@ didCompleteWithError:(nullable NSError *)error {
 - (NSURLSession *)session {
     if (!_session) {
         NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-        NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self.sessionDelegateObject delegateQueue:[VICacheSessionManager shared].downloadQueue];
+        NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self.sessionDelegateObject delegateQueue:[VICacheSessionManager sharedInstance].downloadQueue];
         _session = session;
     }
     return _session;
@@ -224,7 +224,7 @@ didCompleteWithError:(nullable NSError *)error {
 
 - (VICacheAction *)popFirstActionInList {
     @synchronized (self) {
-        VICacheAction *action = [self.actions firstObject];
+        VICacheAction *action = self.actions.firstObject;
         if (action) {
             [self.actions removeObjectAtIndex:0];
             return action;
@@ -239,16 +239,14 @@ didCompleteWithError:(nullable NSError *)error {
 #pragma mark - Notify
 
 - (void)notifyDownloadProgressWithFlush:(BOOL)flush finished:(BOOL)finished {
-    double currentTime = CFAbsoluteTimeGetCurrent();
-    double interval = [VICacheManager cacheUpdateNotifyInterval];
+    NSTimeInterval currentTime = CFAbsoluteTimeGetCurrent();
+    NSTimeInterval interval = [VICacheManager cacheUpdateNotifyInterval];
     if ((self.notifyTime < currentTime - interval) || flush) {
         self.notifyTime = currentTime;
         VICacheConfiguration *configuration = [self.cacheWorker.cacheConfiguration copy];
         [[NSNotificationCenter defaultCenter] postNotificationName:VICacheManagerDidUpdateCacheNotification
                                                             object:self
-                                                          userInfo:@{
-                                                                     VICacheConfigurationKey: configuration,
-                                                                     }];
+                                                          userInfo:@{VICacheConfigurationKey: configuration}];
             
         if (finished && configuration.progress >= 1.0) {
             [self notifyDownloadFinishedWithError:nil];
@@ -269,7 +267,7 @@ didCompleteWithError:(nullable NSError *)error {
 
 #pragma mark - VIURLSessionDelegateObjectDelegate
 
-- (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler {
+- (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential *))completionHandler {
     NSURLCredential *card = [[NSURLCredential alloc] initWithTrust:challenge.protectionSpace.serverTrust];
     completionHandler(NSURLSessionAuthChallengeUseCredential,card);
 }
@@ -354,7 +352,7 @@ didCompleteWithError:(nullable NSError *)error {
 
 @implementation VIMediaDownloaderStatus
 
-+ (instancetype)shared {
++ (VIMediaDownloaderStatus *)sharedInstance {
     static VIMediaDownloaderStatus *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -383,7 +381,7 @@ didCompleteWithError:(nullable NSError *)error {
     }
 }
 
-- (NSSet *)urls {
+- (NSSet<NSURL *> *)urls {
     return [self.downloadingURLS copy];
 }
 
@@ -406,7 +404,7 @@ didCompleteWithError:(nullable NSError *)error {
 @implementation VIMediaDownloader
 
 - (void)dealloc {
-    [[VIMediaDownloaderStatus shared] removeURL:self.url];
+    [[VIMediaDownloaderStatus sharedInstance] removeURL:self.url];
 }
 
 - (instancetype)initWithURL:(NSURL *)url cacheWorker:(VIMediaCacheWorker *)cacheWorker {
@@ -416,12 +414,12 @@ didCompleteWithError:(nullable NSError *)error {
         _url = url;
         _cacheWorker = cacheWorker;
         _info = _cacheWorker.cacheConfiguration.contentInfo;
-        [[VIMediaDownloaderStatus shared] addURL:self.url];
+        [[VIMediaDownloaderStatus sharedInstance] addURL:self.url];
     }
     return self;
 }
 
-- (void)downloadTaskFromOffset:(unsigned long long)fromOffset
+- (void)downloadTaskFromOffset:(long long)fromOffset
                         length:(NSUInteger)length
                          toEnd:(BOOL)toEnd {
     // ---
@@ -453,7 +451,7 @@ didCompleteWithError:(nullable NSError *)error {
 
 - (void)cancel {
     self.actionWorker.delegate = nil;
-    [[VIMediaDownloaderStatus shared] removeURL:self.url];
+    [[VIMediaDownloaderStatus sharedInstance] removeURL:self.url];
     [self.actionWorker cancel];
     self.actionWorker = nil;
 }
@@ -464,15 +462,15 @@ didCompleteWithError:(nullable NSError *)error {
     if (!self.info) {
         VIContentInfo *info = [VIContentInfo new];
         
-        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
-            NSHTTPURLResponse *HTTPURLResponse = (NSHTTPURLResponse *)response;
-            NSString *acceptRange = HTTPURLResponse.allHeaderFields[@"Accept-Ranges"];
-            info.byteRangeAccessSupported = [acceptRange isEqualToString:@"bytes"];
-            info.contentLength = [[[HTTPURLResponse.allHeaderFields[@"Content-Range"] componentsSeparatedByString:@"/"] lastObject] longLongValue];
-        }
         NSString *mimeType = response.MIMEType;
         CFStringRef contentType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef)(mimeType), NULL);
         info.contentType = CFBridgingRelease(contentType);
+        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+            NSHTTPURLResponse *HTTPURLResponse = (NSHTTPURLResponse *)response;
+            info.contentLength = [[HTTPURLResponse.allHeaderFields[@"Content-Range"] componentsSeparatedByString:@"/"].lastObject longLongValue];
+            NSString *acceptRange = HTTPURLResponse.allHeaderFields[@"Accept-Ranges"];
+            info.byteRangeAccessSupported = [acceptRange isEqualToString:@"bytes"];
+        }
         self.info = info;
         
         NSError *error;
@@ -497,7 +495,7 @@ didCompleteWithError:(nullable NSError *)error {
 }
 
 - (void)actionWorker:(VIActionWorker *)actionWorker didFinishWithError:(NSError *)error {
-    [[VIMediaDownloaderStatus shared] removeURL:self.url];
+    [[VIMediaDownloaderStatus sharedInstance] removeURL:self.url];
     
     if (!error && self.downloadToEnd) {
         self.downloadToEnd = NO;

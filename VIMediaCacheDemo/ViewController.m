@@ -188,12 +188,12 @@
     NSDictionary *userInfo = notification.userInfo;
     VICacheConfiguration *configuration = userInfo[VICacheConfigurationKey];
     NSArray<NSValue *> *cachedFragments = configuration.cacheFragments;
-    long long contentLength = configuration.contentInfo.contentLength;
-    
+    unsigned long long contentLength = configuration.contentInfo.contentLength;
+
     NSInteger number = 100;
     NSMutableString *progressStr = [NSMutableString string];
     
-    [cachedFragments enumerateObjectsUsingBlock:^(NSValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [cachedFragments enumerateObjectsUsingBlock:^(NSValue *obj, NSUInteger idx, BOOL *stop) {
         NSRange range = obj.rangeValue;
         
         NSInteger location = roundf((range.location / (double)contentLength) * number);

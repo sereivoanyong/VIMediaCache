@@ -45,7 +45,7 @@
     }
     
     BOOL toEnd = NO;
-    if ([[UIDevice currentDevice].systemVersion floatValue] >= 9.0) {
+    if ([UIDevice currentDevice].systemVersion.floatValue >= 9.0) {
         if (dataRequest.requestsAllDataToEndOfResource) {
             toEnd = YES;
         }
@@ -64,7 +64,7 @@
     }
 }
 
-- (NSError *)loaderCancelledError{
+- (NSError *)loaderCancelledError {
     NSError *error = [[NSError alloc] initWithDomain:@"com.resourceloader"
                                                 code:-3
                                             userInfo:@{NSLocalizedDescriptionKey:@"Resource loader cancelled"}];

@@ -12,7 +12,7 @@
 
 @import UIKit;
 
-static NSInteger const kPackageLength = 512 * 1024; // 512 kb per package
+static NSUInteger const kPackageLength = 512 * 1024; // 512 kb per package
 static NSString *kMCMediaCacheResponseKey = @"kMCMediaCacheResponseKey";
 static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
 
@@ -24,10 +24,8 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
 @property (nonatomic, copy) NSString *filePath;
 @property (nonatomic, strong) VICacheConfiguration *internalCacheConfiguration;
 
-@property (nonatomic) long long currentOffset;
-
 @property (nonatomic, strong) NSDate *startWriteDate;
-@property (nonatomic) float writeBytes;
+@property (nonatomic) long long writeBytes;
 @property (nonatomic) BOOL writting;
 
 @end
@@ -113,21 +111,21 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
     if (range.location == NSNotFound) {
         return [actions copy];
     }
-    NSInteger endOffset = range.location + range.length;
+    NSUInteger endOffset = range.location + range.length;
     // Delete header and footer not in range
-    [cachedFragments enumerateObjectsUsingBlock:^(NSValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [cachedFragments enumerateObjectsUsingBlock:^(NSValue * obj, NSUInteger idx, BOOL *stop) {
         NSRange fragmentRange = obj.rangeValue;
         NSRange intersectionRange = NSIntersectionRange(range, fragmentRange);
         if (intersectionRange.length > 0) {
-            NSInteger package = intersectionRange.length / kPackageLength;
-            for (NSInteger i = 0; i <= package; i++) {
+            NSUInteger package = intersectionRange.length / kPackageLength;
+            for (NSUInteger i = 0; i <= package; i++) {
                 VICacheAction *action = [VICacheAction new];
                 action.actionType = VICacheAtionTypeLocal;
                 
-                NSInteger offset = i * kPackageLength;
-                NSInteger offsetLocation = intersectionRange.location + offset;
-                NSInteger maxLocation = intersectionRange.location + intersectionRange.length;
-                NSInteger length = (offsetLocation + kPackageLength) > maxLocation ? (maxLocation - offsetLocation) : kPackageLength;
+                NSUInteger offset = i * kPackageLength;
+                NSUInteger offsetLocation = intersectionRange.location + offset;
+                NSUInteger maxLocation = intersectionRange.location + intersectionRange.length;
+                NSUInteger length = (offsetLocation + kPackageLength) > maxLocation ? (maxLocation - offsetLocation) : kPackageLength;
                 action.range = NSMakeRange(offsetLocation, length);
                 
                 [actions addObject:action];
@@ -145,7 +143,7 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
     } else {
         // Add remote fragments
         NSMutableArray *localRemoteActions = [NSMutableArray array];
-        [actions enumerateObjectsUsingBlock:^(VICacheAction * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [actions enumerateObjectsUsingBlock:^(VICacheAction *obj, NSUInteger idx, BOOL *stop) {
             NSRange actionRange = obj.range;
             if (idx == 0) {
                 if (range.location < actionRange.location) {
@@ -156,8 +154,8 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
                 }
                 [localRemoteActions addObject:obj];
             } else {
-                VICacheAction *lastAction = [localRemoteActions lastObject];
-                NSInteger lastOffset = lastAction.range.location + lastAction.range.length;
+                VICacheAction *lastAction = localRemoteActions.lastObject;
+                NSUInteger lastOffset = lastAction.range.location + lastAction.range.length;
                 if (actionRange.location > lastOffset) {
                     VICacheAction *action = [VICacheAction new];
                     action.actionType = VICacheAtionTypeRemote;
@@ -168,7 +166,7 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
             }
             
             if (idx == actions.count - 1) {
-                NSInteger localEndOffset = actionRange.location + actionRange.length;
+                NSUInteger localEndOffset = actionRange.location + actionRange.length;
                 if (endOffset > localEndOffset) {
                     VICacheAction *action = [VICacheAction new];
                     action.actionType = VICacheAtionTypeRemote;

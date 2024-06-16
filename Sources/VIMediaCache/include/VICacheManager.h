@@ -9,16 +9,19 @@
 #import <Foundation/Foundation.h>
 #import "VICacheConfiguration.h"
 
-extern NSString *VICacheManagerDidUpdateCacheNotification;
-extern NSString *VICacheManagerDidFinishCacheNotification;
+NS_ASSUME_NONNULL_BEGIN
 
-extern NSString *VICacheConfigurationKey;
-extern NSString *VICacheFinishedErrorKey;
+extern NSNotificationName const VICacheManagerDidUpdateCacheNotification;
+extern NSNotificationName const VICacheManagerDidFinishCacheNotification;
+
+typedef NSString *VICacheUserInfoKey;
+
+extern VICacheUserInfoKey const VICacheConfigurationKey;
+extern VICacheUserInfoKey const VICacheFinishedErrorKey;
 
 @interface VICacheManager : NSObject
 
-+ (void)setCacheDirectory:(NSString *)cacheDirectory;
-+ (NSString *)cacheDirectory;
+@property (class, nonatomic, copy) NSString *cacheDirectory;
 
 
 /**
@@ -26,13 +29,12 @@ extern NSString *VICacheFinishedErrorKey;
 
  @param interval Minimum interval
  */
-+ (void)setCacheUpdateNotifyInterval:(NSTimeInterval)interval;
-+ (NSTimeInterval)cacheUpdateNotifyInterval;
+@property (class, nonatomic, assign) NSTimeInterval cacheUpdateNotifyInterval;
+
+@property (class, nonatomic, copy, nullable) NSString *(^fileNameRules)(NSURL *url);
 
 + (NSString *)cachedFilePathForURL:(NSURL *)url;
 + (VICacheConfiguration *)cacheConfigurationForURL:(NSURL *)url;
-
-+ (void)setFileNameRules:(NSString *(^)(NSURL *url))rules;
 
 
 /**
@@ -56,3 +58,5 @@ extern NSString *VICacheFinishedErrorKey;
 + (BOOL)addCacheFile:(NSString *)filePath forURL:(NSURL *)url error:(NSError **)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

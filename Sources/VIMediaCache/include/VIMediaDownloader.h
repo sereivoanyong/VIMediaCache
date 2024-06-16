@@ -8,13 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol VIMediaDownloaderDelegate;
 @class VIContentInfo;
 @class VIMediaCacheWorker;
 
 @interface VIMediaDownloaderStatus : NSObject
 
-+ (instancetype)shared;
+@property (class, nonatomic, strong, readonly) VIMediaDownloaderStatus *sharedInstance;
 
 - (void)addURL:(NSURL *)url;
 - (void)removeURL:(NSURL *)url;
@@ -23,7 +25,7 @@
  return YES if downloading the url source
  */
 - (BOOL)containsURL:(NSURL *)url;
-- (NSSet *)urls;
+@property (nonatomic, copy, readonly) NSSet<NSURL *> *urls;
 
 @end
 
@@ -31,11 +33,11 @@
 
 - (instancetype)initWithURL:(NSURL *)url cacheWorker:(VIMediaCacheWorker *)cacheWorker;
 @property (nonatomic, strong, readonly) NSURL *url;
-@property (nonatomic, weak) id<VIMediaDownloaderDelegate> delegate;
+@property (nonatomic, weak, nullable) id<VIMediaDownloaderDelegate> delegate;
 @property (nonatomic, strong) VIContentInfo *info;
 @property (nonatomic, assign) BOOL saveToCache;
 
-- (void)downloadTaskFromOffset:(unsigned long long)fromOffset
+- (void)downloadTaskFromOffset:(long long)fromOffset
                         length:(NSUInteger)length
                          toEnd:(BOOL)toEnd;
 - (void)downloadFromStartToEnd;
@@ -52,3 +54,5 @@
 - (void)mediaDownloader:(VIMediaDownloader *)downloader didFinishedWithError:(NSError *)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

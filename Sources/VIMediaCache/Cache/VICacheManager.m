@@ -10,11 +10,11 @@
 #import "VIMediaDownloader.h"
 #import "NSString+VIMD5.h"
 
-NSString *VICacheManagerDidUpdateCacheNotification = @"VICacheManagerDidUpdateCacheNotification";
-NSString *VICacheManagerDidFinishCacheNotification = @"VICacheManagerDidFinishCacheNotification";
+NSNotificationName const VICacheManagerDidUpdateCacheNotification = @"VICacheManagerDidUpdateCacheNotification";
+NSNotificationName const VICacheManagerDidFinishCacheNotification = @"VICacheManagerDidFinishCacheNotification";
 
-NSString *VICacheConfigurationKey = @"VICacheConfigurationKey";
-NSString *VICacheFinishedErrorKey = @"VICacheFinishedErrorKey";
+VICacheUserInfoKey const VICacheConfigurationKey = @"VICacheConfigurationKey";
+VICacheUserInfoKey const VICacheFinishedErrorKey = @"VICacheFinishedErrorKey";
 
 static NSString *kMCMediaCacheDirectory;
 static NSTimeInterval kMCMediaCacheNotifyInterval;
@@ -46,8 +46,12 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
     return kMCMediaCacheNotifyInterval;
 }
 
-+ (void)setFileNameRules:(NSString *(^)(NSURL *url))rules {
-    kMCFileNameRules = rules;
++ (NSString *(^)(NSURL *url))fileNameRules {
+  return kMCFileNameRules;;
+}
+
++ (void)setFileNameRules:(NSString *(^)(NSURL *url))fileNameRules {
+    kMCFileNameRules = fileNameRules;
 }
 
 + (NSString *)cachedFilePathForURL:(NSURL *)url {
@@ -90,7 +94,7 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
 + (void)cleanAllCacheWithError:(NSError **)error {
     // Find downloaing file
     NSMutableSet *downloadingFiles = [NSMutableSet set];
-    [[[VIMediaDownloaderStatus shared] urls] enumerateObjectsUsingBlock:^(NSURL * _Nonnull obj, BOOL * _Nonnull stop) {
+    [[VIMediaDownloaderStatus sharedInstance].urls enumerateObjectsUsingBlock:^(NSURL *obj, BOOL *stop) {
         NSString *file = [self cachedFilePathForURL:obj];
         [downloadingFiles addObject:file];
         NSString *configurationPath = [VICacheConfiguration configurationFilePathForFilePath:file];
@@ -116,7 +120,7 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
 }
 
 + (void)cleanCacheForURL:(NSURL *)url error:(NSError **)error {
-    if ([[VIMediaDownloaderStatus shared] containsURL:url]) {
+    if ([[VIMediaDownloaderStatus sharedInstance] containsURL:url]) {
         NSString *description = [NSString stringWithFormat:NSLocalizedString(@"Clean cache for url `%@` can't be done, because it's downloading", nil), url];
         if (error) {
             *error = [NSError errorWithDomain:@"com.mediadownload" code:2 userInfo:@{NSLocalizedDescriptionKey: description}];
@@ -145,7 +149,7 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
     NSString *cachePath = [VICacheManager cachedFilePathForURL:url];
-    NSString *cacheFolder = [cachePath stringByDeletingLastPathComponent];
+    NSString *cacheFolder = cachePath.stringByDeletingLastPathComponent;
     if (![fileManager fileExistsAtPath:cacheFolder]) {
         if (![fileManager createDirectoryAtPath:cacheFolder
                     withIntermediateDirectories:YES

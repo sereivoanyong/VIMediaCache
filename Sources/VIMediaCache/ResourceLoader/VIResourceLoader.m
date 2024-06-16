@@ -58,7 +58,7 @@ NSString * const MCResourceLoaderErrorDomain = @"LSFilePlayerResourceLoaderError
 
 - (void)removeRequest:(AVAssetResourceLoadingRequest *)request {
     __block VIResourceLoadingRequestWorker *requestWorker = nil;
-    [self.pendingRequestWorkers enumerateObjectsUsingBlock:^(VIResourceLoadingRequestWorker *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [self.pendingRequestWorkers enumerateObjectsUsingBlock:^(VIResourceLoadingRequestWorker *obj, NSUInteger idx, BOOL *stop) {
         if (obj.request == request) {
             requestWorker = obj;
             *stop = YES;
@@ -74,7 +74,7 @@ NSString * const MCResourceLoaderErrorDomain = @"LSFilePlayerResourceLoaderError
     [self.mediaDownloader cancel];
     [self.pendingRequestWorkers removeAllObjects];
     
-    [[VIMediaDownloaderStatus shared] removeURL:self.url];
+    [[VIMediaDownloaderStatus sharedInstance] removeURL:self.url];
 }
 
 #pragma mark - VIResourceLoadingRequestWorkerDelegate
@@ -85,14 +85,14 @@ NSString * const MCResourceLoaderErrorDomain = @"LSFilePlayerResourceLoaderError
         [self.delegate resourceLoader:self didFailWithError:error];
     }
     if (self.pendingRequestWorkers.count == 0) {
-        [[VIMediaDownloaderStatus shared] removeURL:self.url];
+        [[VIMediaDownloaderStatus sharedInstance] removeURL:self.url];
     }
 }
 
 #pragma mark - Helper
 
 - (void)startNoCacheWorkerWithRequest:(AVAssetResourceLoadingRequest *)request {
-    [[VIMediaDownloaderStatus shared] addURL:self.url];
+    [[VIMediaDownloaderStatus sharedInstance] addURL:self.url];
     VIMediaDownloader *mediaDownloader = [[VIMediaDownloader alloc] initWithURL:self.url cacheWorker:self.cacheWorker];
     VIResourceLoadingRequestWorker *requestWorker = [[VIResourceLoadingRequestWorker alloc] initWithMediaDownloader:mediaDownloader
                                                                                              resourceLoadingRequest:request];
@@ -102,7 +102,7 @@ NSString * const MCResourceLoaderErrorDomain = @"LSFilePlayerResourceLoaderError
 }
 
 - (void)startWorkerWithRequest:(AVAssetResourceLoadingRequest *)request {
-    [[VIMediaDownloaderStatus shared] addURL:self.url];
+    [[VIMediaDownloaderStatus sharedInstance] addURL:self.url];
     VIResourceLoadingRequestWorker *requestWorker = [[VIResourceLoadingRequestWorker alloc] initWithMediaDownloader:self.mediaDownloader
                                                                                              resourceLoadingRequest:request];
     [self.pendingRequestWorkers addObject:requestWorker];

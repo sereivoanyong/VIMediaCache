@@ -13,7 +13,7 @@ static NSString *kCacheScheme = @"VIMediaCache:";
 
 @interface VIResourceLoaderManager () <VIResourceLoaderDelegate>
 
-@property (nonatomic, strong) NSMutableDictionary<id<NSCoding>, VIResourceLoader *> *loaders;
+@property (nonatomic, strong) NSMutableDictionary<NSString *, VIResourceLoader *> *loaders;
 
 @end
 
@@ -32,7 +32,7 @@ static NSString *kCacheScheme = @"VIMediaCache:";
 }
 
 - (void)cancelLoaders {
-    [self.loaders enumerateKeysAndObjectsUsingBlock:^(id<NSCoding>  _Nonnull key, VIResourceLoader * _Nonnull obj, BOOL * _Nonnull stop) {
+    [self.loaders enumerateKeysAndObjectsUsingBlock:^(NSString *key, VIResourceLoader *obj, BOOL *stop) {
         [obj cancel];
     }];
     [self.loaders removeAllObjects];
@@ -41,12 +41,12 @@ static NSString *kCacheScheme = @"VIMediaCache:";
 #pragma mark - AVAssetResourceLoaderDelegate
 
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest  {
-    NSURL *resourceURL = [loadingRequest.request URL];
+    NSURL *resourceURL = loadingRequest.request.URL;
     if ([resourceURL.absoluteString hasPrefix:kCacheScheme]) {
         VIResourceLoader *loader = [self loaderForRequest:loadingRequest];
         if (!loader) {
             NSURL *originURL = nil;
-            NSString *originStr = [resourceURL absoluteString];
+            NSString *originStr = resourceURL.absoluteString;
             originStr = [originStr stringByReplacingOccurrencesOfString:kCacheScheme withString:@""];
             originURL = [NSURL URLWithString:originStr];
             loader = [[VIResourceLoader alloc] initWithURL:originURL];
@@ -78,7 +78,7 @@ static NSString *kCacheScheme = @"VIMediaCache:";
 #pragma mark - Helper
 
 - (NSString *)keyForResourceLoaderWithURL:(NSURL *)requestURL {
-    if([[requestURL absoluteString] hasPrefix:kCacheScheme]){
+    if([requestURL.absoluteString hasPrefix:kCacheScheme]){
         NSString *s = requestURL.absoluteString;
         return s;
     }
@@ -96,13 +96,9 @@ static NSString *kCacheScheme = @"VIMediaCache:";
 @implementation VIResourceLoaderManager (Convenient)
 
 + (NSURL *)assetURLWithURL:(NSURL *)url {
-    if (!url) {
-        return nil;
-    }
-
-    NSURL *assetURL = [NSURL URLWithString:[kCacheScheme stringByAppendingString:[url absoluteString]]];
+    NSURL *assetURL = [NSURL URLWithString:[kCacheScheme stringByAppendingString:url.absoluteString]];
     if (assetURL == nil) {
-            return url;
+        return url;
     }
     return assetURL;
 }

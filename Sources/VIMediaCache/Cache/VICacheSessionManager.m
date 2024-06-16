@@ -16,8 +16,8 @@
 
 @implementation VICacheSessionManager
 
-+ (instancetype)shared {
-    static id instance = nil;
++ (VICacheSessionManager *)sharedInstance {
+    static VICacheSessionManager *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         instance = [[self alloc] init];
