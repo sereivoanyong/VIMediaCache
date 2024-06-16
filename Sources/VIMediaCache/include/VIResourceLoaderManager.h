@@ -40,6 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface VIResourceLoaderManager (Convenient)
 
 + (NSURL *)assetURLWithURL:(NSURL *)url;
+- (AVURLAsset *)URLAssetWithURL:(NSURL *)url options:(nullable NSDictionary<NSString *, id> *)options;
 - (AVPlayerItem *)playerItemWithURL:(NSURL *)url;
 
 @end

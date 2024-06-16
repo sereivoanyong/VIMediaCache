@@ -103,14 +103,17 @@ static NSString *kCacheScheme = @"VIMediaCache:";
     return assetURL;
 }
 
-- (AVPlayerItem *)playerItemWithURL:(NSURL *)url {
+- (AVURLAsset *)URLAssetWithURL:(NSURL *)url options:(NSDictionary<NSString *, id> *)options {
     NSURL *assetURL = [VIResourceLoaderManager assetURLWithURL:url];
-    AVURLAsset *urlAsset = [AVURLAsset URLAssetWithURL:assetURL options:nil];
+    AVURLAsset *urlAsset = [AVURLAsset URLAssetWithURL:assetURL options:options];
     [urlAsset.resourceLoader setDelegate:self queue:dispatch_get_main_queue()];
+    return urlAsset;
+}
+
+- (AVPlayerItem *)playerItemWithURL:(NSURL *)url {
+    AVURLAsset *urlAsset = [self URLAssetWithURL:url options:nil];
     AVPlayerItem *playerItem = [AVPlayerItem playerItemWithAsset:urlAsset];
-    if ([playerItem respondsToSelector:@selector(setCanUseNetworkResourcesForLiveStreamingWhilePaused:)]) {
-        playerItem.canUseNetworkResourcesForLiveStreamingWhilePaused = YES;
-    }
+    playerItem.canUseNetworkResourcesForLiveStreamingWhilePaused = YES;
     return playerItem;
 }
 
