@@ -21,7 +21,7 @@ extern VICacheUserInfoKey const VICacheFinishedErrorKey;
 
 @interface VICacheManager : NSObject
 
-@property (class, nonatomic, copy) NSString *cacheDirectory;
+@property (class, nonatomic, copy) NSURL *cacheDirectoryURL;
 
 
 /**
@@ -33,7 +33,7 @@ extern VICacheUserInfoKey const VICacheFinishedErrorKey;
 
 @property (class, nonatomic, copy, nullable) NSString *(^fileNameRules)(NSURL *url);
 
-+ (NSString *)cachedFilePathForURL:(NSURL *)url;
++ (NSURL *)cachedFileURLForURL:(NSURL *)url;
 + (VICacheConfiguration *)cacheConfigurationForURL:(NSURL *)url;
 
 
@@ -51,11 +51,11 @@ extern VICacheUserInfoKey const VICacheFinishedErrorKey;
 /**
  Useful when you upload a local file to the server
 
- @param filePath local file path
+ @param fileURL local file url
  @param url remote resource url
  @param error On input, a pointer to an error object. If an error occurs, this pointer is set to an actual error object containing the error information.
  */
-+ (BOOL)addCacheFile:(NSString *)filePath forURL:(NSURL *)url error:(NSError **)error;
++ (BOOL)addCacheFileURL:(NSURL *)fileURL forURL:(NSURL *)url error:(NSError **)error;
 
 @end
 

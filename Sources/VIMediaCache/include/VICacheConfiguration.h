@@ -13,11 +13,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface VICacheConfiguration : NSObject <NSCopying>
 
-+ (NSString *)configurationFilePathForFilePath:(NSString *)filePath;
++ (NSURL *)configurationFileURLForFileURL:(NSURL *)fileURL;
 
-+ (instancetype)configurationWithFilePath:(NSString *)filePath;
++ (instancetype)configurationWithFileURL:(NSURL *)fileURL;
 
-@property (nonatomic, copy, readonly) NSString *filePath;
+@property (nonatomic, copy, readonly) NSURL *fileURL;
 @property (nonatomic, strong) VIContentInfo *contentInfo;
 @property (nonatomic, strong) NSURL *url;
 

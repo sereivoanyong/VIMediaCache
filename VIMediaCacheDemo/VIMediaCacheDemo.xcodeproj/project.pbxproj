@@ -14,10 +14,23 @@
 		2DF6DF852C1ED69200172990 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2DF6DF842C1ED69200172990 /* Assets.xcassets */; };
 		2DF6DF882C1ED69200172990 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 2DF6DF872C1ED69200172990 /* Base */; };
 		2DF6DF922C1ED6BD00172990 /* VIMediaCache in Frameworks */ = {isa = PBXBuildFile; productRef = 2DF6DF912C1ED6BD00172990 /* VIMediaCache */; };
+		2DF6DF942C1F362400172990 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF6DF932C1F362400172990 /* PlayerView.swift */; };
+		2DF6DF9C2C1F482900172990 /* VIMediaCacheDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF6DF9B2C1F482900172990 /* VIMediaCacheDemoTests.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		2DF6DF9D2C1F482900172990 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2DF6DF702C1ED69100172990 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2DF6DF772C1ED69100172990;
+			remoteInfo = VIMediaCacheDemo;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
-		2DF6DF782C1ED69100172990 /* VIMediaCacheDemoSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VIMediaCacheDemoSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2DE731282C1F5046004CD5F3 /* VIMediaCache */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = VIMediaCache; path = ../..; sourceTree = "<group>"; };
+		2DF6DF782C1ED69100172990 /* VIMediaCacheDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VIMediaCacheDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DF6DF7B2C1ED69100172990 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2DF6DF7D2C1ED69100172990 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		2DF6DF7F2C1ED69100172990 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -25,7 +38,9 @@
 		2DF6DF842C1ED69200172990 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2DF6DF872C1ED69200172990 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2DF6DF892C1ED69200172990 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2DF6DF8F2C1ED6B700172990 /* VIMediaCache */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = VIMediaCache; path = ../..; sourceTree = "<group>"; };
+		2DF6DF932C1F362400172990 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		2DF6DF992C1F482900172990 /* VIMediaCacheDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VIMediaCacheDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2DF6DF9B2C1F482900172990 /* VIMediaCacheDemoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VIMediaCacheDemoTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,13 +52,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2DF6DF962C1F482900172990 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		2DF6DF6F2C1ED69100172990 = {
 			isa = PBXGroup;
 			children = (
-				2DF6DF7A2C1ED69100172990 /* VIMediaCacheDemoSwift */,
+				2DF6DF7A2C1ED69100172990 /* VIMediaCacheDemo */,
+				2DF6DF9A2C1F482900172990 /* VIMediaCacheDemoTests */,
 				2DF6DF792C1ED69100172990 /* Products */,
 				2DF6DF902C1ED6BD00172990 /* Frameworks */,
 			);
@@ -52,24 +75,26 @@
 		2DF6DF792C1ED69100172990 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2DF6DF782C1ED69100172990 /* VIMediaCacheDemoSwift.app */,
+				2DF6DF782C1ED69100172990 /* VIMediaCacheDemo.app */,
+				2DF6DF992C1F482900172990 /* VIMediaCacheDemoTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		2DF6DF7A2C1ED69100172990 /* VIMediaCacheDemoSwift */ = {
+		2DF6DF7A2C1ED69100172990 /* VIMediaCacheDemo */ = {
 			isa = PBXGroup;
 			children = (
-				2DF6DF8F2C1ED6B700172990 /* VIMediaCache */,
+				2DE731282C1F5046004CD5F3 /* VIMediaCache */,
 				2DF6DF7B2C1ED69100172990 /* AppDelegate.swift */,
 				2DF6DF7D2C1ED69100172990 /* SceneDelegate.swift */,
+				2DF6DF932C1F362400172990 /* PlayerView.swift */,
 				2DF6DF7F2C1ED69100172990 /* ViewController.swift */,
 				2DF6DF812C1ED69100172990 /* Main.storyboard */,
 				2DF6DF842C1ED69200172990 /* Assets.xcassets */,
 				2DF6DF862C1ED69200172990 /* LaunchScreen.storyboard */,
 				2DF6DF892C1ED69200172990 /* Info.plist */,
 			);
-			path = VIMediaCacheDemoSwift;
+			path = VIMediaCacheDemo;
 			sourceTree = "<group>";
 		};
 		2DF6DF902C1ED6BD00172990 /* Frameworks */ = {
@@ -79,12 +104,20 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		2DF6DF9A2C1F482900172990 /* VIMediaCacheDemoTests */ = {
+			isa = PBXGroup;
+			children = (
+				2DF6DF9B2C1F482900172990 /* VIMediaCacheDemoTests.swift */,
+			);
+			path = VIMediaCacheDemoTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2DF6DF772C1ED69100172990 /* VIMediaCacheDemoSwift */ = {
+		2DF6DF772C1ED69100172990 /* VIMediaCacheDemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2DF6DF8C2C1ED69200172990 /* Build configuration list for PBXNativeTarget "VIMediaCacheDemoSwift" */;
+			buildConfigurationList = 2DF6DF8C2C1ED69200172990 /* Build configuration list for PBXNativeTarget "VIMediaCacheDemo" */;
 			buildPhases = (
 				2DF6DF742C1ED69100172990 /* Sources */,
 				2DF6DF752C1ED69100172990 /* Frameworks */,
@@ -94,13 +127,31 @@
 			);
 			dependencies = (
 			);
-			name = VIMediaCacheDemoSwift;
+			name = VIMediaCacheDemo;
 			packageProductDependencies = (
 				2DF6DF912C1ED6BD00172990 /* VIMediaCache */,
 			);
-			productName = VIMediaCacheDemoSwift;
-			productReference = 2DF6DF782C1ED69100172990 /* VIMediaCacheDemoSwift.app */;
+			productName = VIMediaCacheDemo;
+			productReference = 2DF6DF782C1ED69100172990 /* VIMediaCacheDemo.app */;
 			productType = "com.apple.product-type.application";
+		};
+		2DF6DF982C1F482900172990 /* VIMediaCacheDemoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2DF6DFA12C1F482900172990 /* Build configuration list for PBXNativeTarget "VIMediaCacheDemoTests" */;
+			buildPhases = (
+				2DF6DF952C1F482900172990 /* Sources */,
+				2DF6DF962C1F482900172990 /* Frameworks */,
+				2DF6DF972C1F482900172990 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2DF6DF9E2C1F482900172990 /* PBXTargetDependency */,
+			);
+			name = VIMediaCacheDemoTests;
+			productName = VIMediaCacheDemoTests;
+			productReference = 2DF6DF992C1F482900172990 /* VIMediaCacheDemoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -115,9 +166,13 @@
 					2DF6DF772C1ED69100172990 = {
 						CreatedOnToolsVersion = 15.4;
 					};
+					2DF6DF982C1F482900172990 = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = 2DF6DF772C1ED69100172990;
+					};
 				};
 			};
-			buildConfigurationList = 2DF6DF732C1ED69100172990 /* Build configuration list for PBXProject "VIMediaCacheDemoSwift" */;
+			buildConfigurationList = 2DF6DF732C1ED69100172990 /* Build configuration list for PBXProject "VIMediaCacheDemo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -130,7 +185,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2DF6DF772C1ED69100172990 /* VIMediaCacheDemoSwift */,
+				2DF6DF772C1ED69100172990 /* VIMediaCacheDemo */,
+				2DF6DF982C1F482900172990 /* VIMediaCacheDemoTests */,
 			);
 		};
 /* End PBXProject section */
@@ -146,6 +202,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2DF6DF972C1F482900172990 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -156,10 +219,27 @@
 				2DF6DF802C1ED69100172990 /* ViewController.swift in Sources */,
 				2DF6DF7C2C1ED69100172990 /* AppDelegate.swift in Sources */,
 				2DF6DF7E2C1ED69100172990 /* SceneDelegate.swift in Sources */,
+				2DF6DF942C1F362400172990 /* PlayerView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2DF6DF952C1F482900172990 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2DF6DF9C2C1F482900172990 /* VIMediaCacheDemoTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2DF6DF9E2C1F482900172990 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2DF6DF772C1ED69100172990 /* VIMediaCacheDemo */;
+			targetProxy = 2DF6DF9D2C1F482900172990 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		2DF6DF812C1ED69100172990 /* Main.storyboard */ = {
@@ -309,7 +389,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QHQ974WAF6;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = VIMediaCacheDemoSwift/Info.plist;
+				INFOPLIST_FILE = VIMediaCacheDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -320,7 +400,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sereivoanyong.VIMediaCacheDemoSwift;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sereivoanyong.VIMediaCacheDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -337,7 +417,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QHQ974WAF6;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = VIMediaCacheDemoSwift/Info.plist;
+				INFOPLIST_FILE = VIMediaCacheDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -348,7 +428,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sereivoanyong.VIMediaCacheDemoSwift;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sereivoanyong.VIMediaCacheDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -356,10 +436,48 @@
 			};
 			name = Release;
 		};
+		2DF6DF9F2C1F482900172990 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QHQ974WAF6;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sereivoanyong.VIMediaCacheDemoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VIMediaCacheDemo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VIMediaCacheDemo";
+			};
+			name = Debug;
+		};
+		2DF6DFA02C1F482900172990 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QHQ974WAF6;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sereivoanyong.VIMediaCacheDemoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VIMediaCacheDemo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VIMediaCacheDemo";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2DF6DF732C1ED69100172990 /* Build configuration list for PBXProject "VIMediaCacheDemoSwift" */ = {
+		2DF6DF732C1ED69100172990 /* Build configuration list for PBXProject "VIMediaCacheDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2DF6DF8A2C1ED69200172990 /* Debug */,
@@ -368,11 +486,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2DF6DF8C2C1ED69200172990 /* Build configuration list for PBXNativeTarget "VIMediaCacheDemoSwift" */ = {
+		2DF6DF8C2C1ED69200172990 /* Build configuration list for PBXNativeTarget "VIMediaCacheDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2DF6DF8D2C1ED69200172990 /* Debug */,
 				2DF6DF8E2C1ED69200172990 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2DF6DFA12C1F482900172990 /* Build configuration list for PBXNativeTarget "VIMediaCacheDemoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2DF6DF9F2C1F482900172990 /* Debug */,
+				2DF6DFA02C1F482900172990 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

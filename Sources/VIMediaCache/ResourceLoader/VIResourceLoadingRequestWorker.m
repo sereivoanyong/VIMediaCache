@@ -45,11 +45,10 @@
     }
     
     BOOL toEnd = NO;
-    if ([UIDevice currentDevice].systemVersion.floatValue >= 9.0) {
-        if (dataRequest.requestsAllDataToEndOfResource) {
-            toEnd = YES;
-        }
+    if (dataRequest.requestsAllDataToEndOfResource) {
+        toEnd = YES;
     }
+
     [self.mediaDownloader downloadTaskFromOffset:offset length:length toEnd:toEnd];
 }
 

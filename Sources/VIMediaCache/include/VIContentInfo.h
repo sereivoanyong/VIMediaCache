@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, copy, nullable) NSString *contentType;
 @property (nonatomic, assign) unsigned long long contentLength;
-@property (nonatomic, assign) BOOL byteRangeAccessSupported;
+@property (nonatomic, assign, getter=isByteRangeAccessSupported) BOOL byteRangeAccessSupported;
 @property (nonatomic) unsigned long long downloadedContentLength;
 
 @end

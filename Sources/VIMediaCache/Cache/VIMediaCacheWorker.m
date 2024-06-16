@@ -21,7 +21,7 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
 @property (nonatomic, strong) NSFileHandle *readFileHandle;
 @property (nonatomic, strong) NSFileHandle *writeFileHandle;
 @property (nonatomic, strong, readwrite) NSError *setupError;
-@property (nonatomic, copy) NSString *filePath;
+@property (nonatomic, copy) NSURL *fileURL;
 @property (nonatomic, strong) VICacheConfiguration *internalCacheConfiguration;
 
 @property (nonatomic, strong) NSDate *startWriteDate;
@@ -42,27 +42,26 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
 - (instancetype)initWithURL:(NSURL *)url {
     self = [super init];
     if (self) {
-        NSString *path = [VICacheManager cachedFilePathForURL:url];
+        NSURL *fileURL = [VICacheManager cachedFileURLForURL:url];
         NSFileManager *fileManager = [NSFileManager defaultManager];
-        _filePath = path;
+        _fileURL = fileURL;
         NSError *error;
-        NSString *cacheFolder = [path stringByDeletingLastPathComponent];
-        if (![fileManager fileExistsAtPath:cacheFolder]) {
-            [fileManager createDirectoryAtPath:cacheFolder
-                   withIntermediateDirectories:YES
-                                    attributes:nil
-                                         error:&error];
+        NSURL *cacheFolderURL = fileURL.URLByDeletingLastPathComponent;
+        if (![fileManager fileExistsAtPath:cacheFolderURL.path]) {
+            [fileManager createDirectoryAtURL:cacheFolderURL
+                  withIntermediateDirectories:YES
+                                   attributes:nil
+                                        error:&error];
         }
         
         if (!error) {
-            if (![[NSFileManager defaultManager] fileExistsAtPath:path]) {
-                [[NSFileManager defaultManager] createFileAtPath:path contents:nil attributes:nil];
+            if (![fileManager fileExistsAtPath:fileURL.path]) {
+                [fileManager createFileAtPath:fileURL.path contents:nil attributes:nil];
             }
-            NSURL *fileURL = [NSURL fileURLWithPath:path];
             _readFileHandle = [NSFileHandle fileHandleForReadingFromURL:fileURL error:&error];
             if (!error) {
                 _writeFileHandle = [NSFileHandle fileHandleForWritingToURL:fileURL error:&error];
-                _internalCacheConfiguration = [VICacheConfiguration configurationWithFilePath:path];
+                _internalCacheConfiguration = [VICacheConfiguration configurationWithFileURL:fileURL];
                 _internalCacheConfiguration.url = url;
             }
         }
@@ -105,7 +104,7 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
 }
 
 - (NSArray<VICacheAction *> *)cachedDataActionsForRange:(NSRange)range {
-    NSArray *cachedFragments = [self.internalCacheConfiguration cacheFragments];
+    NSArray<NSValue *> *cachedFragments = [self.internalCacheConfiguration cacheFragments];
     NSMutableArray *actions = [NSMutableArray array];
     
     if (range.location == NSNotFound) {
@@ -113,13 +112,13 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
     }
     NSUInteger endOffset = range.location + range.length;
     // Delete header and footer not in range
-    [cachedFragments enumerateObjectsUsingBlock:^(NSValue * obj, NSUInteger idx, BOOL *stop) {
+    [cachedFragments enumerateObjectsUsingBlock:^(NSValue *obj, NSUInteger idx, BOOL *stop) {
         NSRange fragmentRange = obj.rangeValue;
         NSRange intersectionRange = NSIntersectionRange(range, fragmentRange);
         if (intersectionRange.length > 0) {
             NSUInteger package = intersectionRange.length / kPackageLength;
             for (NSUInteger i = 0; i <= package; i++) {
-                VICacheAction *action = [VICacheAction new];
+                VICacheAction *action = [[VICacheAction alloc] init];
                 action.actionType = VICacheAtionTypeLocal;
                 
                 NSUInteger offset = i * kPackageLength;
@@ -136,7 +135,7 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
     }];
     
     if (actions.count == 0) {
-        VICacheAction *action = [VICacheAction new];
+        VICacheAction *action = [[VICacheAction alloc] init];
         action.actionType = VICacheAtionTypeRemote;
         action.range = range;
         [actions addObject:action];
@@ -147,7 +146,7 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
             NSRange actionRange = obj.range;
             if (idx == 0) {
                 if (range.location < actionRange.location) {
-                    VICacheAction *action = [VICacheAction new];
+                    VICacheAction *action = [[VICacheAction alloc] init];
                     action.actionType = VICacheAtionTypeRemote;
                     action.range = NSMakeRange(range.location, actionRange.location - range.location);
                     [localRemoteActions addObject:action];
@@ -157,7 +156,7 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
                 VICacheAction *lastAction = localRemoteActions.lastObject;
                 NSUInteger lastOffset = lastAction.range.location + lastAction.range.length;
                 if (actionRange.location > lastOffset) {
-                    VICacheAction *action = [VICacheAction new];
+                    VICacheAction *action = [[VICacheAction alloc] init];
                     action.actionType = VICacheAtionTypeRemote;
                     action.range = NSMakeRange(lastOffset, actionRange.location - lastOffset);
                     [localRemoteActions addObject:action];
@@ -168,7 +167,7 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
             if (idx == actions.count - 1) {
                 NSUInteger localEndOffset = actionRange.location + actionRange.length;
                 if (endOffset > localEndOffset) {
-                    VICacheAction *action = [VICacheAction new];
+                    VICacheAction *action = [[VICacheAction alloc] init];
                     action.actionType = VICacheAtionTypeRemote;
                     action.range = NSMakeRange(localEndOffset, endOffset - localEndOffset);
                     [localRemoteActions addObject:action];

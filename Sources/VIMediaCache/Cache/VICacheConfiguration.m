@@ -18,7 +18,7 @@ static NSString *kURLKey = @"kURLKey";
 
 @interface VICacheConfiguration () <NSCoding>
 
-@property (nonatomic, copy) NSString *filePath;
+@property (nonatomic, copy) NSURL *fileURL;
 @property (nonatomic, copy) NSString *fileName;
 @property (nonatomic, copy) NSArray<NSValue *> *internalCacheFragments;
 @property (nonatomic, copy) NSArray *downloadInfo;
@@ -27,21 +27,21 @@ static NSString *kURLKey = @"kURLKey";
 
 @implementation VICacheConfiguration
 
-+ (instancetype)configurationWithFilePath:(NSString *)filePath {
-    filePath = [self configurationFilePathForFilePath:filePath];
-    VICacheConfiguration *configuration = [NSKeyedUnarchiver unarchiveObjectWithFile:filePath];
-    
++ (instancetype)configurationWithFileURL:(NSURL *)fileURL {
+    fileURL = [self configurationFileURLForFileURL:fileURL];
+    VICacheConfiguration *configuration = [NSKeyedUnarchiver unarchivedObjectOfClass:[VICacheConfiguration class] fromData:[NSData dataWithContentsOfURL:fileURL] error:NULL];
+
     if (!configuration) {
         configuration = [[VICacheConfiguration alloc] init];
-        configuration.fileName = [filePath lastPathComponent];
+        configuration.fileName = fileURL.lastPathComponent;
     }
-    configuration.filePath = filePath;
-    
+    configuration.fileURL = fileURL;
+
     return configuration;
 }
 
-+ (NSString *)configurationFilePathForFilePath:(NSString *)filePath {
-    return [filePath stringByAppendingPathExtension:@"mt_cfg"];
++ (NSURL *)configurationFileURLForFileURL:(NSURL *)fileURL {
+    return [fileURL.URLByDeletingPathExtension URLByAppendingPathExtension:@"mt_cfg"];
 }
 
 - (NSArray<NSValue *> *)internalCacheFragments {
@@ -119,7 +119,7 @@ static NSString *kURLKey = @"kURLKey";
 - (id)copyWithZone:(nullable NSZone *)zone {
     VICacheConfiguration *configuration = [[VICacheConfiguration allocWithZone:zone] init];
     configuration.fileName = self.fileName;
-    configuration.filePath = self.filePath;
+    configuration.fileURL = self.fileURL;
     configuration.internalCacheFragments = self.internalCacheFragments;
     configuration.downloadInfo = self.downloadInfo;
     configuration.url = self.url;
@@ -144,15 +144,15 @@ static NSString *kURLKey = @"kURLKey";
     }
 }
 
-- (void)doDelaySaveAction
-{
+- (void)doDelaySaveAction {
     [[self class] cancelPreviousPerformRequestsWithTarget:self selector:@selector(archiveData) object:nil];
     [self performSelector:@selector(archiveData) withObject:nil afterDelay:1.0];
 }
 
 - (void)archiveData {
     @synchronized (self.internalCacheFragments) {
-        [NSKeyedArchiver archiveRootObject:self toFile:self.filePath];
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self requiringSecureCoding:NO error:NULL];
+        [data writeToURL:self.fileURL options:0 error:NULL];
     }
 }
 
@@ -231,9 +231,9 @@ static NSString *kURLKey = @"kURLKey";
 @implementation VICacheConfiguration (VIConvenient)
 
 + (BOOL)createAndSaveDownloadedConfigurationForURL:(NSURL *)url error:(NSError **)error {
-    NSString *filePath = [VICacheManager cachedFilePathForURL:url];
+    NSURL *fileURL = [VICacheManager cachedFileURLForURL:url];
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSDictionary<NSFileAttributeKey, id> *attributes = [fileManager attributesOfItemAtPath:filePath error:error];
+    NSDictionary<NSFileAttributeKey, id> *attributes = [fileManager attributesOfItemAtPath:fileURL.path error:error];
     if (!attributes) {
         return NO;
     }
@@ -241,10 +241,10 @@ static NSString *kURLKey = @"kURLKey";
     unsigned long long fileSize = attributes.fileSize;
     NSRange range = NSMakeRange(0, (NSUInteger)fileSize);
 
-    VICacheConfiguration *configuration = [VICacheConfiguration configurationWithFilePath:filePath];
+    VICacheConfiguration *configuration = [VICacheConfiguration configurationWithFileURL:fileURL];
     configuration.url = url;
     
-    VIContentInfo *contentInfo = [VIContentInfo new];
+    VIContentInfo *contentInfo = [[VIContentInfo alloc] init];
     
     NSString *fileExtension = url.pathExtension;
     NSString *UTI = (__bridge_transfer NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)fileExtension, NULL);

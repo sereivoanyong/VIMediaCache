@@ -429,7 +429,7 @@ didCompleteWithError:(nullable NSError *)error {
         range.length = (NSUInteger)self.cacheWorker.cacheConfiguration.contentInfo.contentLength - range.location;
     }
     
-    NSArray *actions = [self.cacheWorker cachedDataActionsForRange:range];
+    NSArray<VICacheAction *> *actions = [self.cacheWorker cachedDataActionsForRange:range];
 
     self.actionWorker = [[VIActionWorker alloc] initWithActions:actions url:self.url cacheWorker:self.cacheWorker];
     self.actionWorker.canSaveToCache = self.saveToCache;
@@ -441,7 +441,7 @@ didCompleteWithError:(nullable NSError *)error {
     // ---
     self.downloadToEnd = YES;
     NSRange range = NSMakeRange(0, 2);
-    NSArray *actions = [self.cacheWorker cachedDataActionsForRange:range];
+    NSArray<VICacheAction *> *actions = [self.cacheWorker cachedDataActionsForRange:range];
 
     self.actionWorker = [[VIActionWorker alloc] initWithActions:actions url:self.url cacheWorker:self.cacheWorker];
     self.actionWorker.canSaveToCache = self.saveToCache;
@@ -460,7 +460,7 @@ didCompleteWithError:(nullable NSError *)error {
 
 - (void)actionWorker:(VIActionWorker *)actionWorker didReceiveResponse:(NSURLResponse *)response {
     if (!self.info) {
-        VIContentInfo *info = [VIContentInfo new];
+        VIContentInfo *info = [[VIContentInfo alloc] init];
         
         NSString *mimeType = response.MIMEType;
         CFStringRef contentType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef)(mimeType), NULL);

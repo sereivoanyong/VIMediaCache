@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "VICacheConfiguration.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class VICacheAction;
 
 @interface VIMediaCacheWorker : NSObject
@@ -30,3 +32,5 @@
 - (void)finishWritting;
 
 @end
+
+NS_ASSUME_NONNULL_END

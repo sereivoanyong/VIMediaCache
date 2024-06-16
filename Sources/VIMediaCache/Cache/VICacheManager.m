@@ -16,7 +16,7 @@ NSNotificationName const VICacheManagerDidFinishCacheNotification = @"VICacheMan
 VICacheUserInfoKey const VICacheConfigurationKey = @"VICacheConfigurationKey";
 VICacheUserInfoKey const VICacheFinishedErrorKey = @"VICacheFinishedErrorKey";
 
-static NSString *kMCMediaCacheDirectory;
+static NSURL *kMCMediaCacheDirectoryURL;
 static NSTimeInterval kMCMediaCacheNotifyInterval;
 static NSString *(^kMCFileNameRules)(NSURL *url);
 
@@ -25,17 +25,17 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
 + (void)load {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        [self setCacheDirectory:[NSTemporaryDirectory() stringByAppendingPathComponent:@"vimedia"]];
+        [self setCacheDirectoryURL:[[NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES] URLByAppendingPathComponent:@"vimedia"]];
         [self setCacheUpdateNotifyInterval:0.1];
     });
 }
 
-+ (void)setCacheDirectory:(NSString *)cacheDirectory {
-    kMCMediaCacheDirectory = cacheDirectory;
++ (void)setCacheDirectoryURL:(NSURL *)cacheDirectoryURL {
+    kMCMediaCacheDirectoryURL = cacheDirectoryURL;
 }
 
-+ (NSString *)cacheDirectory {
-    return kMCMediaCacheDirectory;
++ (NSURL *)cacheDirectoryURL {
+    return kMCMediaCacheDirectoryURL;
 }
 
 + (void)setCacheUpdateNotifyInterval:(NSTimeInterval)interval {
@@ -54,38 +54,38 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
     kMCFileNameRules = fileNameRules;
 }
 
-+ (NSString *)cachedFilePathForURL:(NSURL *)url {
-    NSString *pathComponent = nil;
++ (NSURL *)cachedFileURLForURL:(NSURL *)url {
+    NSString *pathComponent;
     if (kMCFileNameRules) {
         pathComponent = kMCFileNameRules(url);
     } else {
         pathComponent = [url.absoluteString vi_md5];
         pathComponent = [pathComponent stringByAppendingPathExtension:url.pathExtension];
     }
-    return [[self cacheDirectory] stringByAppendingPathComponent:pathComponent];
+    return [[self cacheDirectoryURL] URLByAppendingPathComponent:pathComponent];
 }
 
 + (VICacheConfiguration *)cacheConfigurationForURL:(NSURL *)url {
-    NSString *filePath = [self cachedFilePathForURL:url];
-    VICacheConfiguration *configuration = [VICacheConfiguration configurationWithFilePath:filePath];
+    NSURL *fileURL = [self cachedFileURLForURL:url];
+    VICacheConfiguration *configuration = [VICacheConfiguration configurationWithFileURL:fileURL];
     return configuration;
 }
 
 + (unsigned long long)calculateCachedSizeWithError:(NSError **)error {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *cacheDirectory = [self cacheDirectory];
-    NSArray *files = [fileManager contentsOfDirectoryAtPath:cacheDirectory error:error];
+    NSURL *cacheDirectoryURL = [self cacheDirectoryURL];
+    NSArray<NSURL *> *fileURLs = [fileManager contentsOfDirectoryAtURL:cacheDirectoryURL includingPropertiesForKeys:@[NSURLFileSizeKey] options:0 error:error];
     unsigned long long size = 0;
-    if (files) {
-        for (NSString *path in files) {
-            NSString *filePath = [cacheDirectory stringByAppendingPathComponent:path];
-            NSDictionary<NSFileAttributeKey, id> *attribute = [fileManager attributesOfItemAtPath:filePath error:error];
-            if (!attribute) {
+    if (fileURLs) {
+        for (NSURL *fileURL in fileURLs) {
+            NSNumber *fileSize;
+            [fileURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL];
+            if (!fileSize) {
                 size = -1;
                 break;
             }
-            
-            size += [attribute fileSize];
+
+            size += fileSize.unsignedLongLongValue;
         }
     }
     return size;
@@ -93,26 +93,25 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
 
 + (void)cleanAllCacheWithError:(NSError **)error {
     // Find downloaing file
-    NSMutableSet *downloadingFiles = [NSMutableSet set];
+    NSMutableSet<NSURL *> *downloadingFiles = [NSMutableSet set];
     [[VIMediaDownloaderStatus sharedInstance].urls enumerateObjectsUsingBlock:^(NSURL *obj, BOOL *stop) {
-        NSString *file = [self cachedFilePathForURL:obj];
-        [downloadingFiles addObject:file];
-        NSString *configurationPath = [VICacheConfiguration configurationFilePathForFilePath:file];
-        [downloadingFiles addObject:configurationPath];
+        NSURL *fileURL = [self cachedFileURLForURL:obj];
+        [downloadingFiles addObject:fileURL];
+        NSURL *configurationFileURL = [VICacheConfiguration configurationFileURLForFileURL:fileURL];
+        [downloadingFiles addObject:configurationFileURL];
     }];
     
     // Remove files
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *cacheDirectory = [self cacheDirectory];
-    
-    NSArray *files = [fileManager contentsOfDirectoryAtPath:cacheDirectory error:error];
-    if (files) {
-        for (NSString *path in files) {
-            NSString *filePath = [cacheDirectory stringByAppendingPathComponent:path];
-            if ([downloadingFiles containsObject:filePath]) {
+    NSURL *cacheDirectoryURL = [self cacheDirectoryURL];
+
+    NSArray<NSURL *> *fileURLs = [fileManager contentsOfDirectoryAtURL:cacheDirectoryURL includingPropertiesForKeys:nil options:0 error:error];
+    if (fileURLs) {
+        for (NSURL *fileURL in fileURLs) {
+            if ([downloadingFiles containsObject:fileURL]) {
                 continue;
             }
-            if (![fileManager removeItemAtPath:filePath error:error]) {
+            if (![fileManager removeItemAtURL:fileURL error:error]) {
                 break;
             }
         }
@@ -129,42 +128,42 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
     }
     
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *filePath = [self cachedFilePathForURL:url];
-    
-    if ([fileManager fileExistsAtPath:filePath]) {
-        if (![fileManager removeItemAtPath:filePath error:error]) {
+    NSURL *fileURL = [self cachedFileURLForURL:url];
+
+    if ([fileManager fileExistsAtPath:fileURL.path]) {
+        if (![fileManager removeItemAtURL:fileURL error:error]) {
             return;
         }
     }
     
-    NSString *configurationPath = [VICacheConfiguration configurationFilePathForFilePath:filePath];
-    if ([fileManager fileExistsAtPath:configurationPath]) {
-        if (![fileManager removeItemAtPath:configurationPath error:error]) {
+    NSURL *configurationFileURL = [VICacheConfiguration configurationFileURLForFileURL:fileURL];
+    if ([fileManager fileExistsAtPath:configurationFileURL.path]) {
+        if (![fileManager removeItemAtURL:configurationFileURL error:error]) {
             return;
         }
     }
 }
 
-+ (BOOL)addCacheFile:(NSString *)filePath forURL:(NSURL *)url error:(NSError **)error {
++ (BOOL)addCacheFileURL:(NSURL *)fileURL forURL:(NSURL *)url error:(NSError **)error {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
-    NSString *cachePath = [VICacheManager cachedFilePathForURL:url];
-    NSString *cacheFolder = cachePath.stringByDeletingLastPathComponent;
-    if (![fileManager fileExistsAtPath:cacheFolder]) {
-        if (![fileManager createDirectoryAtPath:cacheFolder
-                    withIntermediateDirectories:YES
-                                     attributes:nil
-                                          error:error]) {
+    NSURL *cacheURL = [VICacheManager cachedFileURLForURL:url];
+    NSURL *cacheFolderURL = [cacheURL URLByDeletingLastPathComponent];
+    if (![fileManager fileExistsAtPath:cacheFolderURL.path]) {
+        if (![fileManager createDirectoryAtURL:cacheFolderURL
+                   withIntermediateDirectories:YES
+                                    attributes:nil
+                                         error:error]) {
             return NO;
         }
     }
     
-    if (![fileManager copyItemAtPath:filePath toPath:cachePath error:error]) {
+    if (![fileManager copyItemAtURL:fileURL toURL:cacheURL error:error]) {
         return NO;
     }
     
     if (![VICacheConfiguration createAndSaveDownloadedConfigurationForURL:url error:error]) {
-        [fileManager removeItemAtPath:cachePath error:nil]; // if remove failed, there is nothing we can do.
+        [fileManager removeItemAtURL:cacheURL error:nil]; // if remove failed, there is nothing we can do.
         return NO;
     }
     
