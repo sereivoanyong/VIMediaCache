@@ -15,11 +15,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSURL *)configurationFileURLForFileURL:(NSURL *)fileURL;
 
-+ (instancetype)configurationWithFileURL:(NSURL *)fileURL;
++ (instancetype)configurationWithFileURL:(NSURL *)fileURL url:(NSURL *)url;
 
 @property (nonatomic, copy, readonly) NSURL *fileURL;
 @property (nonatomic, strong) VIContentInfo *contentInfo;
-@property (nonatomic, strong) NSURL *url;
+@property (nonatomic, copy, readonly) NSURL *url;
 
 - (NSArray<NSValue *> *)cacheFragments;
 

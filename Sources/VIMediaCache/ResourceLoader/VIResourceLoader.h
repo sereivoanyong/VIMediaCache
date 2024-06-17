@@ -16,7 +16,9 @@
 @property (nonatomic, strong, readonly) NSURL *url;
 @property (nonatomic, weak) id<VIResourceLoaderDelegate> delegate;
 
-- (instancetype)initWithURL:(NSURL *)url;
+- (instancetype)initWithURL:(NSURL *)url NS_DESIGNATED_INITIALIZER;
+
+- (instancetype)init NS_UNAVAILABLE;
 
 - (void)addRequest:(AVAssetResourceLoadingRequest *)request;
 - (void)removeRequest:(AVAssetResourceLoadingRequest *)request;

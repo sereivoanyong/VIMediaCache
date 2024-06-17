@@ -27,7 +27,6 @@ NSErrorDomain const MCResourceLoaderErrorDomain = @"LSFilePlayerResourceLoaderEr
 
 @implementation VIResourceLoader
 
-
 - (void)dealloc {
     [_mediaDownloader cancel];
 }
@@ -41,11 +40,6 @@ NSErrorDomain const MCResourceLoaderErrorDomain = @"LSFilePlayerResourceLoaderEr
         _pendingRequestWorkers = [NSMutableArray array];
     }
     return self;
-}
-
-- (instancetype)init {
-    NSAssert(NO, @"Use - initWithURL: instead");
-    return nil;
 }
 
 - (void)addRequest:(AVAssetResourceLoadingRequest *)request {

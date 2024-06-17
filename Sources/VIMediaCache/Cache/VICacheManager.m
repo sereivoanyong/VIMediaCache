@@ -25,7 +25,8 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
 + (void)load {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        [self setCacheDirectoryURL:[[NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES] URLByAppendingPathComponent:@"vimedia"]];
+        NSURL *temporaryDirectoryURL = [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES];
+        [self setCacheDirectoryURL:[temporaryDirectoryURL URLByAppendingPathComponent:@"vimedia"]];
         [self setCacheUpdateNotifyInterval:0.1];
     });
 }
@@ -67,7 +68,7 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
 
 + (VICacheConfiguration *)cacheConfigurationForURL:(NSURL *)url {
     NSURL *fileURL = [self cachedFileURLForURL:url];
-    VICacheConfiguration *configuration = [VICacheConfiguration configurationWithFileURL:fileURL];
+    VICacheConfiguration *configuration = [VICacheConfiguration configurationWithFileURL:fileURL url:url];
     return configuration;
 }
 
@@ -94,8 +95,8 @@ static NSString *(^kMCFileNameRules)(NSURL *url);
 + (void)cleanAllCacheWithError:(NSError **)error {
     // Find downloaing file
     NSMutableSet<NSURL *> *downloadingFiles = [NSMutableSet set];
-    [[VIMediaDownloaderStatus sharedInstance].urls enumerateObjectsUsingBlock:^(NSURL *obj, BOOL *stop) {
-        NSURL *fileURL = [self cachedFileURLForURL:obj];
+    [[VIMediaDownloaderStatus sharedInstance].urls enumerateObjectsUsingBlock:^(NSURL *url, BOOL *stop) {
+        NSURL *fileURL = [self cachedFileURLForURL:url];
         [downloadingFiles addObject:fileURL];
         NSURL *configurationFileURL = [VICacheConfiguration configurationFileURLForFileURL:fileURL];
         [downloadingFiles addObject:configurationFileURL];

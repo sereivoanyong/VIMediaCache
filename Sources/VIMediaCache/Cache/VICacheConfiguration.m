@@ -10,7 +10,6 @@
 #import "VICacheManager.h"
 #import <MobileCoreServices/MobileCoreServices.h>
 
-static NSString *kFileNameKey = @"kFileNameKey";
 static NSString *kCacheFragmentsKey = @"kCacheFragmentsKey";
 static NSString *kDownloadInfoKey = @"kDownloadInfoKey";
 static NSString *kContentInfoKey = @"kContentInfoKey";
@@ -19,24 +18,31 @@ static NSString *kURLKey = @"kURLKey";
 @interface VICacheConfiguration () <NSCoding>
 
 @property (nonatomic, copy) NSURL *fileURL;
-@property (nonatomic, copy) NSString *fileName;
 @property (nonatomic, copy) NSArray<NSValue *> *internalCacheFragments;
-@property (nonatomic, copy) NSArray *downloadInfo;
+@property (nonatomic, copy) NSMutableArray<NSArray<NSNumber *> *> *downloadInfo;
+@property (nonatomic, copy) NSURL *url;
 
 @end
 
 @implementation VICacheConfiguration
 
-+ (instancetype)configurationWithFileURL:(NSURL *)fileURL {
-    fileURL = [self configurationFileURLForFileURL:fileURL];
-    VICacheConfiguration *configuration = [NSKeyedUnarchiver unarchivedObjectOfClass:[VICacheConfiguration class] fromData:[NSData dataWithContentsOfURL:fileURL] error:NULL];
-
-    if (!configuration) {
-        configuration = [[VICacheConfiguration alloc] init];
-        configuration.fileName = fileURL.lastPathComponent;
+- (instancetype)initWithConfigurationFileURL:(NSURL *)configurationFileURL url:(NSURL *)url {
+    self = [super init];
+    if (self) {
+        _fileURL = configurationFileURL;
+        _url = url;
     }
-    configuration.fileURL = fileURL;
+    return self;
+}
 
++ (instancetype)configurationWithFileURL:(NSURL *)fileURL url:(NSURL *)url {
+    NSURL *configurationFileURL = [self configurationFileURLForFileURL:fileURL];
+    VICacheConfiguration *configuration = [NSKeyedUnarchiver unarchivedObjectOfClass:[VICacheConfiguration class] fromData:[NSData dataWithContentsOfURL:configurationFileURL] error:NULL];
+    if (configuration) {
+        NSAssert(configuration.url == url, @"URL mismatch");
+    } else {
+        configuration = [[VICacheConfiguration alloc] initWithConfigurationFileURL:configurationFileURL url:url];
+    }
     return configuration;
 }
 
@@ -51,9 +57,9 @@ static NSString *kURLKey = @"kURLKey";
     return _internalCacheFragments;
 }
 
-- (NSArray *)downloadInfo {
+- (NSMutableArray<NSArray<NSNumber *> *> *)downloadInfo {
     if (!_downloadInfo) {
-        _downloadInfo = [NSArray array];
+        _downloadInfo = [NSMutableArray array];
     }
     return _downloadInfo;
 }
@@ -63,7 +69,7 @@ static NSString *kURLKey = @"kURLKey";
 }
 
 - (float)progress {
-    float progress = self.downloadedBytes / (float)self.contentInfo.contentLength;
+    float progress = (float)self.downloadedBytes / (float)self.contentInfo.contentLength;
     return progress;
 }
 
@@ -79,30 +85,28 @@ static NSString *kURLKey = @"kURLKey";
 
 - (float)downloadSpeed {
     long long bytes = 0;
-    NSTimeInterval time = 0;
+    NSTimeInterval time = 0.0;
     @synchronized (self.downloadInfo) {
-        for (NSArray *a in self.downloadInfo) {
-            bytes += [a.firstObject longLongValue];
-            time += [a.lastObject doubleValue];
+        for (NSArray<NSNumber *> *a in self.downloadInfo) {
+            bytes += a.firstObject.longLongValue;
+            time += a.lastObject.doubleValue;
         }
     }
-    return bytes / 1024.0 / time;
+    return (float)((double)bytes / 1024.0 / time);
 }
 
 #pragma mark - NSCoding
 
 - (void)encodeWithCoder:(NSCoder *)aCoder {
-    [aCoder encodeObject:self.fileName forKey:kFileNameKey];
     [aCoder encodeObject:self.internalCacheFragments forKey:kCacheFragmentsKey];
     [aCoder encodeObject:self.downloadInfo forKey:kDownloadInfoKey];
     [aCoder encodeObject:self.contentInfo forKey:kContentInfoKey];
     [aCoder encodeObject:self.url forKey:kURLKey];
 }
 
-- (nullable instancetype)initWithCoder:(NSCoder *)aDecoder {
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
     self = [super init];
     if (self) {
-        _fileName = [aDecoder decodeObjectForKey:kFileNameKey];
         _internalCacheFragments = [[aDecoder decodeObjectForKey:kCacheFragmentsKey] mutableCopy];
         if (!_internalCacheFragments) {
             _internalCacheFragments = [NSArray array];
@@ -116,15 +120,13 @@ static NSString *kURLKey = @"kURLKey";
 
 #pragma mark - NSCopying
 
-- (id)copyWithZone:(nullable NSZone *)zone {
+- (id)copyWithZone:(NSZone *)zone {
     VICacheConfiguration *configuration = [[VICacheConfiguration allocWithZone:zone] init];
-    configuration.fileName = self.fileName;
     configuration.fileURL = self.fileURL;
     configuration.internalCacheFragments = self.internalCacheFragments;
     configuration.downloadInfo = self.downloadInfo;
-    configuration.url = self.url;
     configuration.contentInfo = self.contentInfo;
-    
+    configuration.url = self.url;
     return configuration;
 }
 
@@ -222,7 +224,7 @@ static NSString *kURLKey = @"kURLKey";
 
 - (void)addDownloadedBytes:(long long)bytes spent:(NSTimeInterval)time {
     @synchronized (self.downloadInfo) {
-        self.downloadInfo = [self.downloadInfo arrayByAddingObject:@[@(bytes), @(time)]];
+        [self.downloadInfo addObject:@[@(bytes), @(time)]];
     }
 }
 
@@ -241,8 +243,7 @@ static NSString *kURLKey = @"kURLKey";
     unsigned long long fileSize = attributes.fileSize;
     NSRange range = NSMakeRange(0, (NSUInteger)fileSize);
 
-    VICacheConfiguration *configuration = [VICacheConfiguration configurationWithFileURL:fileURL];
-    configuration.url = url;
+    VICacheConfiguration *configuration = [VICacheConfiguration configurationWithFileURL:fileURL url:url];
     
     VIContentInfo *contentInfo = [[VIContentInfo alloc] init];
     

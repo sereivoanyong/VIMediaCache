@@ -30,7 +30,7 @@
         _mediaDownloader.delegate = self;
         _request = request;
         
-        [self fullfillContentInfo];
+        [self fulfillContentInfo];
     }
     return self;
 }
@@ -70,7 +70,7 @@
     return error;
 }
 
-- (void)fullfillContentInfo {
+- (void)fulfillContentInfo {
     AVAssetResourceLoadingContentInformationRequest *contentInformationRequest = self.request.contentInformationRequest;
     if (self.mediaDownloader.info && !contentInformationRequest.contentType) {
         // Fullfill content information
@@ -83,7 +83,7 @@
 #pragma mark - VIMediaDownloaderDelegate
 
 - (void)mediaDownloader:(VIMediaDownloader *)downloader didReceiveResponse:(NSURLResponse *)response {
-    [self fullfillContentInfo];
+    [self fulfillContentInfo];
 }
 
 - (void)mediaDownloader:(VIMediaDownloader *)downloader didReceiveData:(NSData *)data {

@@ -61,8 +61,7 @@ static NSString *VIMediaCacheErrorDoamin = @"com.vimediacache";
             _readFileHandle = [NSFileHandle fileHandleForReadingFromURL:fileURL error:&error];
             if (!error) {
                 _writeFileHandle = [NSFileHandle fileHandleForWritingToURL:fileURL error:&error];
-                _internalCacheConfiguration = [VICacheConfiguration configurationWithFileURL:fileURL];
-                _internalCacheConfiguration.url = url;
+                _internalCacheConfiguration = [VICacheConfiguration configurationWithFileURL:fileURL url:url];
             }
         }
         

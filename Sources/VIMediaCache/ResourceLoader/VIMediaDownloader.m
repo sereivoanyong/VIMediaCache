@@ -53,16 +53,11 @@ static NSUInteger kBufferSize = 10 * 1024;
     [self.delegate URLSession:session didReceiveChallenge:challenge completionHandler:completionHandler];
 }
 
-- (void)URLSession:(NSURLSession *)session
-          dataTask:(NSURLSessionDataTask *)dataTask
-didReceiveResponse:(NSURLResponse *)response
- completionHandler:(void (^)(NSURLSessionResponseDisposition disposition))completionHandler {
+- (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveResponse:(NSURLResponse *)response completionHandler:(void (^)(NSURLSessionResponseDisposition disposition))completionHandler {
     [self.delegate URLSession:session dataTask:dataTask didReceiveResponse:response completionHandler:completionHandler];
 }
 
-- (void)URLSession:(NSURLSession *)session
-          dataTask:(NSURLSessionDataTask *)dataTask
-    didReceiveData:(NSData *)data {
+- (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
     @synchronized (self.bufferData) {
         [self.bufferData appendData:data];
         if (self.bufferData.length > kBufferSize) {
@@ -74,9 +69,7 @@ didReceiveResponse:(NSURLResponse *)response
     }
 }
 
-- (void)URLSession:(NSURLSession *)session
-              task:(NSURLSessionDataTask *)task
-didCompleteWithError:(nullable NSError *)error {
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionDataTask *)task didCompleteWithError:(nullable NSError *)error {
     @synchronized (self.bufferData) {
         if (self.bufferData.length > 0 && !error) {
             NSRange chunkRange = NSMakeRange(0, self.bufferData.length);
@@ -105,6 +98,7 @@ didCompleteWithError:(nullable NSError *)error {
 @interface VIActionWorker : NSObject <VIURLSessionDelegateObjectDelegate>
 
 @property (nonatomic, strong) NSMutableArray<VICacheAction *> *actions;
+
 - (instancetype)initWithActions:(NSArray<VICacheAction *> *)actions url:(NSURL *)url cacheWorker:(VIMediaCacheWorker *)cacheWorker;
 
 @property (nonatomic, assign) BOOL canSaveToCache;
@@ -269,13 +263,10 @@ didCompleteWithError:(nullable NSError *)error {
 
 - (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential *))completionHandler {
     NSURLCredential *card = [[NSURLCredential alloc] initWithTrust:challenge.protectionSpace.serverTrust];
-    completionHandler(NSURLSessionAuthChallengeUseCredential,card);
+    completionHandler(NSURLSessionAuthChallengeUseCredential, card);
 }
 
-- (void)URLSession:(NSURLSession *)session
-          dataTask:(NSURLSessionDataTask *)dataTask
-didReceiveResponse:(NSURLResponse *)response
- completionHandler:(void (^)(NSURLSessionResponseDisposition disposition))completionHandler {
+- (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveResponse:(NSURLResponse *)response completionHandler:(void (^)(NSURLSessionResponseDisposition disposition))completionHandler {
     NSString *mimeType = response.MIMEType;
     // Only download video/audio data
     if ([mimeType rangeOfString:@"video/"].location == NSNotFound &&
@@ -293,9 +284,7 @@ didReceiveResponse:(NSURLResponse *)response
     }
 }
 
-- (void)URLSession:(NSURLSession *)session
-          dataTask:(NSURLSessionDataTask *)dataTask
-    didReceiveData:(NSData *)data {
+- (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
     if (self.isCancelled) {
         return;
     }
@@ -321,9 +310,7 @@ didReceiveResponse:(NSURLResponse *)response
     [self notifyDownloadProgressWithFlush:NO finished:NO];
 }
 
-- (void)URLSession:(NSURLSession *)session
-              task:(NSURLSessionTask *)task
-didCompleteWithError:(nullable NSError *)error {
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
     if (self.canSaveToCache) {
         [self.cacheWorker finishWritting];
         [self.cacheWorker save];
@@ -346,7 +333,7 @@ didCompleteWithError:(nullable NSError *)error {
 
 @interface VIMediaDownloaderStatus ()
 
-@property (nonatomic, strong) NSMutableSet *downloadingURLS;
+@property (nonatomic, strong) NSMutableSet<NSURL *> *downloadingURLS;
 
 @end
 
@@ -419,9 +406,7 @@ didCompleteWithError:(nullable NSError *)error {
     return self;
 }
 
-- (void)downloadTaskFromOffset:(long long)fromOffset
-                        length:(NSUInteger)length
-                         toEnd:(BOOL)toEnd {
+- (void)downloadTaskFromOffset:(long long)fromOffset length:(NSUInteger)length toEnd:(BOOL)toEnd {
     // ---
     NSRange range = NSMakeRange((NSUInteger)fromOffset, length);
     
